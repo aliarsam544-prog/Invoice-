@@ -11,11 +11,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        @font-face { font-family: 'Jameel Noori Nastaleeq'; src: url('https://cdn.jsdelivr.net/gh/websitebeaver/Jameel-Noori-Nastaleeq-Font/jameel-noori-nastaleeq-regular.ttf') format('truetype'); }
+        @font-face { 
+            font-family: 'Jameel Noori Nastaleeq'; 
+            src: url('https://cdn.jsdelivr.net/gh/websitebeaver/Jameel-Noori-Nastaleeq-Font/jameel-noori-nastaleeq-regular.ttf') format('truetype'); 
+        }
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
         
-        html[lang="ur"] body { font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif; }
-        html[lang="en"] body { font-family: 'Inter', sans-serif; }
+        html[lang="ur"] body { 
+            font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif; 
+        }
+        html[lang="en"] body { 
+            font-family: 'Inter', sans-serif; 
+        }
         
         .urdu-font { font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', serif; }
         .latin-font { font-family: 'Inter', sans-serif; }
@@ -34,6 +41,12 @@
         html[dir="rtl"] .modal-footer { text-align: left; }
         .lang-btn.active { background-color: #4f46e5; color: white; }
 
+        /* ▼▼▼ صرف یہ نئی کلاس شامل کی گئی ہے تاکہ شیئر کی گئی تصویر نہ کٹے ▼▼▼ */
+        #invoice-container.share-mode {
+            width: 800px !important;
+            max-width: 800px !important;
+        }
+
         @media print {
             body { background-color: white; margin: 0; padding: 0; }
             .no-print { display: none; }
@@ -50,7 +63,7 @@
 <body class="p-2 md:p-8">
 
     <div class="max-w-4xl mx-auto space-y-6">
-        <!-- All HTML is unchanged -->
+        <!-- HTML is unchanged -->
         <details class="bg-white rounded-xl shadow-sm p-4 no-print">
             <summary data-translate="businessDetailsTitle" class="font-bold text-xl cursor-pointer">کاروباری تفصیلات</summary>
             <div class="mt-4 pt-4 border-t space-y-4">
@@ -144,7 +157,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const BILL_NO_KEY = 'invoiceApp_billNo_final_v11';
     const LANG_KEY = 'invoiceApp_language_v11';
 
-    // All JS is the same except for the one line in addNewRow
     const translations = {
         en: {
             businessDetailsTitle: "Business Details & Backup", businessNamePlaceholder: "Business Name", addressPlaceholder: "Address", phonePlaceholder: "Phone Number", termsPlaceholder: "Terms & Conditions", businessNameFontSize: "Business Name Font Size", positionLabel: "Position (Left/Right)", saveSettingsBtn: "Save Settings", backupDataBtn: "Backup Data", restoreDataBtn: "Restore Data", billNoLabel: "Bill No. :", itemHeader: "Item", qtyHeader: "Qty.", rateHeader: "Rate", totalHeader: "Total", totalLabel: "Total", discountLabel: "Discount", receivedLabel: "Received", balanceLabel: "Balance", addRowBtn: "+ Add Row", removeRowBtn: "- Remove Row", newBillBtn: "New Bill", saveBillBtn: "Save", previewBtn: "Preview", printBtn: "Print / PDF", shareBtn: "Share Image", historyTitle: "Saved Bill History", historyBillNo: "Bill No", historyDate: "Date", loadBtn: "Load", deleteBtn: "Delete", loaderText: "Please wait...", printBtnShort: "Print", closeBtn: "Close",
@@ -167,29 +179,31 @@ document.addEventListener('DOMContentLoaded', function() {
     function attachEventListeners() { dom.languageSwitcher.addEventListener('click', (e) => { const langBtn = e.target.closest('.lang-btn'); if (langBtn) { setLanguage(langBtn.dataset.lang); } }); dom.settings.saveBtn.addEventListener('click', saveSettings); dom.settings.fontSizeSlider.addEventListener('input', applyCustomStyles); dom.settings.positionSlider.addEventListener('input', applyCustomStyles); dom.addRowBtn.addEventListener('click', () => addNewRow()); dom.removeRowBtn.addEventListener('click', removeLastRow); dom.itemRows.addEventListener('input', e => { if (e.target.matches('.qty, .rate')) calculateRow(e.target); }); dom.itemRows.addEventListener('click', e => { if (e.target.closest('.delete-row-btn')) deleteRow(e.target.closest('.delete-row-btn')); }); ['discount-percent', 'gst-percent', 'received-amount'].forEach(id => { document.getElementById(id).addEventListener('input', calculateTotals); }); dom.actionBtns.new.addEventListener('click', () => resetForm(true)); dom.actionBtns.save.addEventListener('click', saveBill); dom.actionBtns.print.addEventListener('click', () => window.print()); dom.actionBtns.share.addEventListener('click', () => shareAsImage()); dom.actionBtns.preview.addEventListener('click', showPreview); dom.previewShareBtn.addEventListener('click', () => shareAsImage(dom.previewContent)); dom.previewPrintBtn.addEventListener('click', printPreview); dom.previewCloseBtn.addEventListener('click', () => dom.previewModal.style.display = 'none'); dom.historyList.addEventListener('click', (e) => { const loadBtn = e.target.closest('.load-bill-btn'); const deleteBtn = e.target.closest('.delete-bill-btn'); if (loadBtn) loadBill(loadBtn.dataset.id); if (deleteBtn) deleteBill(deleteBtn.dataset.id); }); dom.backupBtn.addEventListener('click', backupData); dom.restoreBtn.addEventListener('click', () => dom.restoreFileInput.click()); dom.restoreFileInput.addEventListener('change', restoreData); }
     function formatNumber(num) { let number = parseFloat(String(num).replace(/,/g, '')) || 0; return number.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
     function showToast(message, type = 'success') { const toast = document.createElement('div'); toast.className = 'toast'; if (currentLanguage === 'ur') toast.classList.add('urdu-font'); toast.textContent = message; if (type === 'error') { toast.style.backgroundColor = '#e74c3c'; } if (type === 'info') { toast.style.backgroundColor = '#3498db'; } document.body.appendChild(toast); setTimeout(() => toast.classList.add('show'), 10); setTimeout(() => { toast.classList.remove('show'); setTimeout(() => document.body.removeChild(toast), 500); }, 4000); }
-    function applyCustomStyles() { dom.display.name.style.fontSize = `${dom.settings.fontSizeSlider.value}px`; dom.display.wrapper.style.transform = `translateX(${dom.settings.positionSlider.value}px)`; }
-    function loadSettings() { const settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); dom.settings.name.value = settings.name || ''; dom.settings.address.value = settings.address || ''; dom.settings.phone.value = settings.phone || ''; dom.settings.terms.value = settings.terms || ''; dom.settings.fontSizeSlider.value = settings.fontSize || '28'; dom.settings.positionSlider.value = settings.position || '0'; updateDisplayInfo(); applyCustomStyles(); }
-    function saveSettings() { const settings = { name: dom.settings.name.value, address: dom.settings.address.value, phone: dom.settings.phone.value, terms: dom.settings.terms.value, fontSize: dom.settings.fontSizeSlider.value, position: dom.settings.positionSlider.value }; localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); updateDisplayInfo(); applyCustomStyles(); showToast(translations[currentLanguage].toastSettingsSaved); }
-    function updateDisplayInfo() { dom.display.name.textContent = dom.settings.name.value || translations[currentLanguage].businessNameDefault; dom.display.address.textContent = dom.settings.address.value; dom.display.phone.textContent = dom.settings.phone.value; dom.display.terms.textContent = dom.settings.terms.value; dom.display.name.classList.toggle('urdu-font', currentLanguage === 'ur' || !dom.settings.name.value); dom.display.address.classList.toggle('urdu-font', currentLanguage === 'ur'); dom.display.terms.classList.toggle('urdu-font', currentLanguage === 'ur'); }
-    function getNextBillNo() { return parseInt(localStorage.getItem(BILL_NO_KEY) || '1'); }
     
+    function applyCustomStyles() {
+        dom.display.name.style.fontSize = `${dom.settings.fontSizeSlider.value}px`;
+        dom.display.wrapper.style.left = `${dom.settings.positionSlider.value}px`;
+    }
+
     function addNewRow(item = { name: '', qty: '', rate: '' }) {
         const row = document.createElement('tr');
         const itemPlaceholder = translations[currentLanguage].itemHeader;
-
-        // FINAL FIX: Removed the "flex" class and used "align-middle" for vertical alignment within the table structure.
+        
         row.innerHTML = `
-            <td class="border border-black align-middle"><input type="text" placeholder="${itemPlaceholder}" class="item-name w-full p-2 text-sm bg-transparent ltr:text-left rtl:text-right" value="${item.name}"></td>
-            <td class="border border-black align-middle"><input type="number" value="${item.qty}" class="qty w-full p-2 text-sm text-center bg-transparent latin-font"></td>
-            <td class="border border-black align-middle"><input type="text" class="rate w-full p-2 text-sm text-center bg-transparent latin-font" value="${item.rate}"></td>
-            <td class="border border-black align-middle"><input type="text" class="total w-full p-2 text-sm text-right bg-transparent font-bold latin-font" readonly></td>
+            <td class="border border-black p-2 align-middle"><input type="text" placeholder="${itemPlaceholder}" class="item-name w-full text-sm bg-transparent ltr:text-left rtl:text-right" value="${item.name}"></td>
+            <td class="border border-black p-2 align-middle"><input type="number" value="${item.qty}" class="qty w-full text-sm text-center bg-transparent latin-font"></td>
+            <td class="border border-black p-2 align-middle"><input type="text" class="rate w-full text-sm text-center bg-transparent latin-font" value="${item.rate}"></td>
+            <td class="border border-black p-2 align-middle"><input type="text" class="total w-full text-sm text-right bg-transparent font-bold latin-font" readonly></td>
             <td class="no-print text-center align-middle"><button class="delete-row-btn text-red-500 hover:text-red-700 p-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.58.22-2.365.468a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193v-.443A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75a1.25 1.25 0 00-1.25-1.25h-2.5A1.25 1.25 0 007.5 3.75v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z" clip-rule="evenodd" /></svg></button></td>
         `;
         dom.itemRows.appendChild(row);
         if (item.qty && item.rate) { calculateRow(row.querySelector('.rate')); }
     }
-    
-    // All functions below this are unchanged and correct
+
+    function loadSettings() { const settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); dom.settings.name.value = settings.name || ''; dom.settings.address.value = settings.address || ''; dom.settings.phone.value = settings.phone || ''; dom.settings.terms.value = settings.terms || ''; dom.settings.fontSizeSlider.value = settings.fontSize || '28'; dom.settings.positionSlider.value = settings.position || '0'; updateDisplayInfo(); applyCustomStyles(); }
+    function saveSettings() { const settings = { name: dom.settings.name.value, address: dom.settings.address.value, phone: dom.settings.phone.value, terms: dom.settings.terms.value, fontSize: dom.settings.fontSizeSlider.value, position: dom.settings.positionSlider.value }; localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); updateDisplayInfo(); applyCustomStyles(); showToast(translations[currentLanguage].toastSettingsSaved); }
+    function updateDisplayInfo() { dom.display.name.textContent = dom.settings.name.value || translations[currentLanguage].businessNameDefault; dom.display.address.textContent = dom.settings.address.value; dom.display.phone.textContent = dom.settings.phone.value; dom.display.terms.textContent = dom.settings.terms.value; dom.display.name.classList.toggle('urdu-font', currentLanguage === 'ur' || !dom.settings.name.value); dom.display.address.classList.toggle('urdu-font', currentLanguage === 'ur'); dom.display.terms.classList.toggle('urdu-font', currentLanguage === 'ur'); }
+    function getNextBillNo() { return parseInt(localStorage.getItem(BILL_NO_KEY) || '1'); }
     function removeLastRow() { if (dom.itemRows.children.length > 1) { dom.itemRows.removeChild(dom.itemRows.lastElementChild); calculateTotals(); } else { showToast(translations[currentLanguage].toastOneRowRequired, 'error'); } }
     function deleteRow(button) { if (dom.itemRows.children.length > 1) { button.closest('tr').remove(); calculateTotals(); } else { showToast(translations[currentLanguage].toastOneRowRequired, 'error'); } }
     function calculateRow(input) { const row = input.closest('tr'); const qty = parseFloat(row.querySelector('.qty').value) || 0; const rate = parseFloat(row.querySelector('.rate').value.replace(/,/g, '')) || 0; const total = qty * rate; row.querySelector('.total').value = formatNumber(total); calculateTotals(); }
@@ -205,7 +219,63 @@ document.addEventListener('DOMContentLoaded', function() {
     function printPreview() { const content = dom.previewContent.innerHTML; const printWindow = window.open('', '', 'height=800,width=800'); printWindow.document.write(`<html><head><title>Print</title><link href="https://cdn.tailwindcss.com" rel="stylesheet"><style>@font-face { font-family: 'Jameel Noori Nastaleeq'; src: url('https://cdn.jsdelivr.net/gh/websitebeaver/Jameel-Noori-Nastaleeq-Font/jameel-noori-nastaleeq-regular.ttf') format('truetype'); } html[lang="ur"] body{font-family:"Jameel Noori Nastaleeq",serif;} html[lang="en"] body{font-family:"Inter",sans-serif;} .invoice-border{border: 1px solid #1f2937!important;} @media print { body, #invoice-container { margin: 0; padding: 0; } #invoice-container { width: 100%; } }</style></head><body lang="${currentLanguage}" dir="${currentLanguage === 'ur' ? 'rtl' : 'ltr'}">${content}</body></html>`); printWindow.document.close(); setTimeout(() => { printWindow.print(); }, 500); }
     function backupData() { const data = { settings: JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'), history: getHistory(), billNo: localStorage.getItem(BILL_NO_KEY) || '1' }; const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `invoice-backup-${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(a.href); }
     function restoreData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (data.settings && data.history && data.billNo) { localStorage.setItem(SETTINGS_KEY, JSON.stringify(data.settings)); saveHistory(data.history); localStorage.setItem(BILL_NO_KEY, data.billNo); loadSettings(); loadHistory(); resetForm(false); showToast(translations[currentLanguage].toastDataRestored); } else { throw new Error("Invalid backup file structure"); } } catch (err) { console.error("Restore failed:", err); showToast(translations[currentLanguage].toastDataBackupFailed, 'error'); } }; reader.readAsText(file); event.target.value = ''; }
-    async function shareAsImage(elementToCapture = document.getElementById('invoice-container')) { dom.loader.classList.remove('hidden'); dom.loader.classList.add('flex'); await new Promise(resolve => setTimeout(resolve, 50)); try { const canvas = await html2canvas(elementToCapture, { scale: 2, backgroundColor: '#ffffff', useCORS: true }); canvas.toBlob(async (blob) => { if (!blob) { throw new Error('Canvas to Blob conversion failed'); } const file = new File([blob], 'invoice.png', { type: 'image/png' }); const customerName = dom.invoice.customerName.value || 'invoice'; const billNo = dom.invoice.billNo.value || 'N/A'; const shareData = { files: [file], title: `Bill for ${customerName}`, text: `Bill No: ${billNo}` }; if (navigator.share && navigator.canShare && navigator.canShare(shareData)) { try { await navigator.share(shareData); } catch (err) { console.error('Share was cancelled or failed:', err); } } else { const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `Invoice-${billNo}.png`; link.click(); URL.revokeObjectURL(link.href); showToast(translations[currentLanguage].toastShareFallback, 'info'); } }, 'image/png'); } catch (err) { console.error('html2canvas failed:', err); showToast(translations[currentLanguage].toastShareFailed, 'error'); } finally { dom.loader.classList.add('hidden'); dom.loader.classList.remove('flex'); } }
+    
+    // ▼▼▼ اس فنکشن کو اپڈیٹ کیا گیا ہے تاکہ تصویر صاف اور مکمل آئے ▼▼▼
+    async function shareAsImage(elementToCapture = document.getElementById('invoice-container')) {
+        dom.loader.classList.remove('hidden');
+        dom.loader.classList.add('flex');
+
+        const wrapper = dom.display.wrapper;
+        const originalLeft = wrapper.style.left;
+        
+        // تصویر بنانے کے لیے انوائس کو عارضی طور پر چوڑا کریں
+        elementToCapture.classList.add('share-mode'); 
+        
+        // بزنس نام کی پوزیشن کو ٹھیک کریں
+        wrapper.style.removeProperty('left');
+
+        // براؤزر کو نئی چوڑائی اپلائی کرنے کے لیے تھوڑا سا وقت دیں
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        try {
+            const canvas = await html2canvas(elementToCapture, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                // html2canvas کو بھی چوڑائی کے بارے میں بتائیں
+                windowWidth: 800 
+            });
+            canvas.toBlob(async (blob) => {
+                if (!blob) { throw new Error('Canvas to Blob conversion failed'); }
+                const file = new File([blob], 'invoice.png', { type: 'image/png' });
+                const customerName = dom.invoice.customerName.value || 'invoice';
+                const billNo = dom.invoice.billNo.value || 'N/A';
+                const shareData = { files: [file], title: `Bill for ${customerName}`, text: `Bill No: ${billNo}` };
+                if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+                    try { await navigator.share(shareData); } 
+                    catch (err) { console.error('Share was cancelled or failed:', err); }
+                } else {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `Invoice-${billNo}.png`;
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                    showToast(translations[currentLanguage].toastShareFallback, 'info');
+                }
+            }, 'image/png');
+        } catch (err) {
+            console.error('html2canvas failed:', err);
+            showToast(translations[currentLanguage].toastShareFailed, 'error');
+        } finally {
+            // اصل اسٹائل بحال کریں
+            wrapper.style.left = originalLeft;
+            // انوائس کو واپس اصلی حالت میں لانے کے لیے کلاس ہٹا دیں
+            elementToCapture.classList.remove('share-mode'); 
+            
+            dom.loader.classList.add('hidden');
+            dom.loader.classList.remove('flex');
+        }
+    }
 
     initializeApp();
 });
